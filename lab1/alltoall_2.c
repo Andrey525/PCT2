@@ -17,20 +17,32 @@ int main(int argc, char *argv[]) {
     char *recvbuf = malloc(sizeof(*recvbuf) * count * commsize);
 
     double t = MPI_Wtime();
-    for (int i = 0; i < commsize; i++) {
-        MPI_Isend(sendbuf + i * count, count, MPI_CHAR, i, 0, MPI_COMM_WORLD,
-                  &reqs[i]);
-        MPI_Irecv(recvbuf + i * count, count, MPI_CHAR, i, 0, MPI_COMM_WORLD,
-                  &reqs[commsize + i]);
+
+    #if 0
+    int j = rank;
+    do {
+        MPI_Isend(sendbuf + j * count, count, MPI_CHAR, j, 0, MPI_COMM_WORLD,
+                  &reqs[j]);
+        MPI_Irecv(recvbuf + j * count, count, MPI_CHAR, j, 0, MPI_COMM_WORLD,
+                  &reqs[commsize + j]);
+        j = (j + 1) % commsize;
+    } while (j != rank);
+    #endif
+
+    for (int i = rank; i < commsize + rank; i++) {
+        MPI_Isend(sendbuf + (i % commsize) * count, count, MPI_CHAR, i % commsize, 0, MPI_COMM_WORLD,
+                  &reqs[i % commsize]);
+        MPI_Irecv(recvbuf + (i % commsize) * count, count, MPI_CHAR, i % commsize, 0, MPI_COMM_WORLD,
+                  &reqs[commsize + (i % commsize)]);
     }
     MPI_Waitall(commsize * 2, reqs, stats);
-
     t = MPI_Wtime() - t;
     double tmax;
     MPI_Reduce(&t, &tmax, 1, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
     if (rank == 0) {
         printf("Tmax = %lf\n", tmax);
     }
+
     free(sendbuf);
     free(recvbuf);
     MPI_Finalize();
