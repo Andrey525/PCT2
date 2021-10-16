@@ -3,6 +3,7 @@
 !.gitignore
 !lab1
 !lab2
+!lab3
 !*.c
 !*.h
 !.clang-format

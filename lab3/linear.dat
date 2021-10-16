@@ -1,0 +1,5 @@
+#proc 	time 	speedup
+8		0		1
+16		0		2
+32		0		4
+64		0		8
