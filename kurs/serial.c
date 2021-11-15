@@ -3,7 +3,7 @@
 
 #define SIZE 100
 
-void quicksort(int *array, int index_left, int index_right, int index_pivot) {
+void quicksort(int *array, int index_left, int index_right) {
 
 	if (index_right == index_left) {
 		return;
@@ -14,6 +14,7 @@ void quicksort(int *array, int index_left, int index_right, int index_pivot) {
 	int temp;
 	int index_left_for_next = index_left;
 	int index_right_for_next = index_right;
+	int index_pivot = (index_left + index_right) / 2;
 
 	while (index_right > index_left) {
 		if (array[index_left] >= array[index_pivot] && array[index_right] <= array[index_pivot]) {
@@ -47,11 +48,11 @@ void quicksort(int *array, int index_left, int index_right, int index_pivot) {
 	}
 	printf("index_left_for_next = %d index_right_for_next = %d\n", index_left_for_next, index_right_for_next);
 	if (index_left_for_next != index_pivot) {
-		quicksort(array, index_left_for_next, index_pivot - 1, (index_left_for_next + index_pivot - 1) / 2);	
+		quicksort(array, index_left_for_next, index_pivot - 1);	
 	}
 	
 	if (index_right_for_next != index_pivot) {
-		quicksort(array, index_pivot + 1, index_right_for_next, (index_pivot + 1 + index_right_for_next) / 2);	
+		quicksort(array, index_pivot + 1, index_right_for_next);	
 	}
 	
 }
@@ -62,11 +63,10 @@ int main(int argc, char *argv[]) {
 	for (int i = 0; i < SIZE; i++) {
 		array[i] = rand() % 100;
 	}
-	int index_pivot = 1;
 	int index_left = 0;
 	int index_right = SIZE - 1;
 	
-	quicksort(array, index_left, index_right, index_pivot);
+	quicksort(array, index_left, index_right);
 
 	return 0;
 }
