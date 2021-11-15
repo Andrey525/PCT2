@@ -55,8 +55,8 @@ void sgemv(float *a, float *b, float *c, int m, int n) {
 }
 
 int main(int argc, char *argv[]) {
-    const int n = 1000;
-    const int m = 1000;
+    const int n = 10000;
+    const int m = 10000;
     int commsize, rank;
     MPI_Init(&argc, &argv);
     MPI_Comm_size(MPI_COMM_WORLD, &commsize);
@@ -85,21 +85,11 @@ int main(int argc, char *argv[]) {
     t = MPI_Wtime() - t;
 
     if (rank == 0) {
-        // Validation
-        for (int i = 0; i < m; i++) {
-            float r = (i + 1) * (n / 2.0 + pow(n, 2) / 2.0);
-            if (fabs(c[i] - r) > 1E-6) {
-                fprintf(stderr,
-                        "Validation failed: elem %d = %f (real value %f)\n", i,
-                        c[i], r);
-                break;
-            }
-        }
-        printf("DGEMV: matrix-vector product (c[m] = a[m, n] * b[n]; m = "
+        printf("SGEMV: matrix-vector product (c[m] = a[m, n] * b[n]; m = "
                "%d, n = %d)\n",
                m, n);
         printf("Memory used: %" PRIu64 " MiB\n",
-               (uint64_t)(((double)m * n + m + n) * sizeof(double)) >> 20);
+               (uint64_t)(((float)m * n + m + n) * sizeof(float)) >> 20);
         double gflop = 2.0 * m * n * 1E-9;
         printf("Elapsed time (%d procs): %.6f sec.\n", commsize, t);
         printf("Performance: %.2f GFLOPS\n", gflop / t);
