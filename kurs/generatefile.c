@@ -21,8 +21,10 @@ int main(int argc, char *argv[]) {
         int size = atoi(argv[2]);
         srand(time(NULL));
         for (int i = 0; i < size; i++) {
-            fprintf(fp, "%d\n", rand() % 100);
+            fprintf(fp, "%d\n", rand() % 10000);
         }
+        fclose(fp);
+        printf("Generation competed!\n");
     } else {
         printf("Use, for example: ./generatefile [Name of file] 100\n");
         return 1;

@@ -6,6 +6,7 @@
 !lab3
 !lab4
 !kurs
+!Makefile
 !*.c
 !*.h
 !.clang-format
