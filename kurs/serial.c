@@ -72,20 +72,23 @@ int main(int argc, char *argv[]) {
         } else {
             printf("File for reading opened successfully!\n");
         }
-
+        double t_read;
+     	t_read = wtime();
         int capacity = 10;
-        int i, size;
+        int size = 0;
         int *array = malloc(sizeof(int) * capacity);
-        for (i = 0; !feof(fp); i++) {
+        for (int i = 0; !feof(fp); i++) {
             if (i == capacity) {
                 capacity = capacity * 2;
                 array = realloc(array, sizeof(int) * capacity);
             }
             fscanf(fp, "%d", &array[i]);
+            size++;
         }
         fclose(fp);
+        t_read = wtime() - t_read;
+        printf("t_read = %lf\n", t_read);
         printf("File content read successfully!\n");
-        size = i - 1;
 
         printf("Starting to sort!\n");
         double t;
@@ -103,8 +106,13 @@ int main(int argc, char *argv[]) {
         } else {
             printf("File for writing opened successfully!\n");
         }
-        for (i = 0; i < size; i++) {
-            fprintf(fp, "%d\n", array[i]);
+        for (int i = 0; i < size; i++) {
+        	if (i < size - 1) {
+        		fprintf(fp, "%d\n", array[i]);	
+        	} else {
+        		fprintf(fp, "%d", array[i]);
+        	}
+            
         }
         fclose(fp);
         printf("Sorted content write to %s successfully!\n", argv[2]);
