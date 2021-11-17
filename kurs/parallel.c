@@ -1,14 +1,6 @@
 #include <mpi.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/time.h>
-#include <time.h>
-
-double wtime() {
-    struct timeval t;
-    gettimeofday(&t, NULL);
-    return (double)t.tv_sec + (double)t.tv_usec * 1E-6;
-}
 
 void swap(int *array, int index_left, int index_right) {
     int temp;
@@ -62,9 +54,7 @@ void quicksort(int *array, int index_left, int index_right) {
     }
 }
 
-int *merge(int *array1, int size1, int *array2,
-           int size2) // сливаем два отсортированных подмассива
-{
+int *merge(int *array1, int size1, int *array2, int size2) {
     int *result = malloc((size1 + size2) * sizeof(int));
     int i = 0;
     int j = 0;
@@ -150,7 +140,7 @@ int main(int argc, char *argv[]) {
             printf("Starting to sort!\n");
         }
         double t;
-        t = wtime();
+        t = MPI_Wtime();
         quicksort(local_array, 0, local_size - 1);
 
         int recv_size;
@@ -176,7 +166,7 @@ int main(int argc, char *argv[]) {
                 local_size = local_size + recv_size;
             }
         }
-        t = wtime() - t;
+        t = MPI_Wtime() - t;
 
         if (rank == 0) {
             printf("Quicksort completed!\n");
