@@ -1,8 +1,8 @@
+#include <mpi.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
 #include <sys/time.h>
-#include <mpi.h>
+#include <time.h>
 
 double wtime() {
     struct timeval t;
@@ -11,8 +11,8 @@ double wtime() {
 }
 
 void swap(int *array, int index_left, int index_right) {
-	int temp;
-	temp = array[index_left];
+    int temp;
+    temp = array[index_left];
     array[index_left] = array[index_right];
     array[index_right] = temp;
 }
@@ -62,31 +62,29 @@ void quicksort(int *array, int index_left, int index_right) {
     }
 }
 
-int *merge(int *array1, int size1, int *array2, int size2) // сливаем два отсортированных подмассива
+int *merge(int *array1, int size1, int *array2,
+           int size2) // сливаем два отсортированных подмассива
 {
-  int *result = malloc((size1 + size2) * sizeof(int));
-  int i = 0;
-  int j = 0;
-  int k;
-  for (k = 0; k < size1 + size2; k++) {
-    if (i >= size1) {
-      result[k] = array2[j];
-      j++;
+    int *result = malloc((size1 + size2) * sizeof(int));
+    int i = 0;
+    int j = 0;
+    int k;
+    for (k = 0; k < size1 + size2; k++) {
+        if (i >= size1) {
+            result[k] = array2[j];
+            j++;
+        } else if (j >= size2) {
+            result[k] = array1[i];
+            i++;
+        } else if (array1[i] < array2[j]) {
+            result[k] = array1[i];
+            i++;
+        } else {
+            result[k] = array2[j];
+            j++;
+        }
     }
-    else if (j >= size2) {
-      result[k] = array1[i];
-      i++;
-    }
-    else if (array1[i] < array2[j]) { 
-      result[k] = array1[i];
-      i++;
-    }
-    else { 
-      result[k] = array2[j];
-      j++;
-    }
-  }
-  return result;
+    return result;
 }
 
 int main(int argc, char *argv[]) {
@@ -112,7 +110,7 @@ int main(int argc, char *argv[]) {
                 printf("File for reading opened successfully!\n");
             }
             array = malloc(sizeof(int) * capacity);
-        
+
             for (int i = 0; !feof(fp); i++) {
                 if (size == capacity) {
                     capacity = capacity * 2;
@@ -127,16 +125,21 @@ int main(int argc, char *argv[]) {
 
         MPI_Bcast(&size, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
-        local_size = (rank != commsize - 1) ? (size / commsize) : (size - ((size / commsize) * (commsize - 1)));
+        local_size = (rank != commsize - 1)
+                         ? (size / commsize)
+                         : (size - ((size / commsize) * (commsize - 1)));
         local_array = calloc(local_size, sizeof(int));
 
         int *displs = malloc(sizeof(int) * commsize);
         int *scounts = malloc(sizeof(int) * commsize);
         for (int i = 0; i < commsize; i++) {
-            scounts[i] = (i != commsize - 1) ? (size / commsize) : (size - ((size / commsize) * (commsize - 1)));
+            scounts[i] = (i != commsize - 1)
+                             ? (size / commsize)
+                             : (size - ((size / commsize) * (commsize - 1)));
             displs[i] = (i > 0) ? displs[i - 1] + scounts[i - 1] : 0;
         }
-        MPI_Scatterv(array, scounts, displs, MPI_INT, local_array, local_size, MPI_INT, 0, MPI_COMM_WORLD);
+        MPI_Scatterv(array, scounts, displs, MPI_INT, local_array, local_size,
+                     MPI_INT, 0, MPI_COMM_WORLD);
 
         if (rank == 0) {
             free(array);
@@ -149,19 +152,23 @@ int main(int argc, char *argv[]) {
         double t;
         t = wtime();
         quicksort(local_array, 0, local_size - 1);
-        
+
         int recv_size;
         int *recv_array;
         for (int step = 1; step < commsize; step = 2 * step) {
             if (rank % (2 * step) != 0) {
-                MPI_Send(&local_size, 1, MPI_INT, rank - step, 0, MPI_COMM_WORLD);
-                MPI_Send(local_array, local_size, MPI_INT, rank - step, 0, MPI_COMM_WORLD);
+                MPI_Send(&local_size, 1, MPI_INT, rank - step, 0,
+                         MPI_COMM_WORLD);
+                MPI_Send(local_array, local_size, MPI_INT, rank - step, 0,
+                         MPI_COMM_WORLD);
                 break;
             }
             if (rank + step < commsize) {
-                MPI_Recv(&recv_size, 1, MPI_INT, rank + step, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+                MPI_Recv(&recv_size, 1, MPI_INT, rank + step, 0, MPI_COMM_WORLD,
+                         MPI_STATUS_IGNORE);
                 recv_array = malloc(recv_size * sizeof(int));
-                MPI_Recv(recv_array, recv_size, MPI_INT, rank + step, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+                MPI_Recv(recv_array, recv_size, MPI_INT, rank + step, 0,
+                         MPI_COMM_WORLD, MPI_STATUS_IGNORE);
                 array = merge(local_array, local_size, recv_array, recv_size);
                 free(local_array);
                 free(recv_array);
@@ -191,7 +198,7 @@ int main(int argc, char *argv[]) {
             }
             for (int i = 0; i < local_size; i++) {
                 if (i < local_size - 1) {
-                    fprintf(fp, "%d\n", local_array[i]);  
+                    fprintf(fp, "%d\n", local_array[i]);
                 } else {
                     fprintf(fp, "%d", local_array[i]);
                 }
@@ -200,14 +207,13 @@ int main(int argc, char *argv[]) {
             printf("Sorted content write to %s successfully!\n", argv[2]);
         }
 
-        
         free(local_array);
-        
+
     } else {
         if (rank == 0) {
-            printf("Use: mpiexec ./parallel [Name of source file] [Name of result file]\n");    
+            printf("Use: mpiexec ./parallel [Name of source file] [Name of "
+                   "result file]\n");
         }
-        
     }
     MPI_Finalize();
     return 0;

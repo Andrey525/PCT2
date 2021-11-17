@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
 #include <sys/time.h>
+#include <time.h>
 
 double wtime() {
     struct timeval t;
@@ -10,8 +10,8 @@ double wtime() {
 }
 
 void swap(int *array, int index_left, int index_right) {
-	int temp;
-	temp = array[index_left];
+    int temp;
+    temp = array[index_left];
     array[index_left] = array[index_right];
     array[index_right] = temp;
 }
@@ -73,7 +73,7 @@ int main(int argc, char *argv[]) {
             printf("File for reading opened successfully!\n");
         }
         double t_read;
-     	t_read = wtime();
+        t_read = wtime();
         int capacity = 10;
         int size = 0;
         int *array = malloc(sizeof(int) * capacity);
@@ -107,12 +107,11 @@ int main(int argc, char *argv[]) {
             printf("File for writing opened successfully!\n");
         }
         for (int i = 0; i < size; i++) {
-        	if (i < size - 1) {
-        		fprintf(fp, "%d\n", array[i]);	
-        	} else {
-        		fprintf(fp, "%d", array[i]);
-        	}
-            
+            if (i < size - 1) {
+                fprintf(fp, "%d\n", array[i]);
+            } else {
+                fprintf(fp, "%d", array[i]);
+            }
         }
         fclose(fp);
         printf("Sorted content write to %s successfully!\n", argv[2]);
