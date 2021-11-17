@@ -1,24 +1,28 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <sys/time.h>
 
-void quicksort(int *array, int index_left, int index_right) {
+double wtime() {
+    struct timeval t;
+    gettimeofday(&t, NULL);
+    return (double)t.tv_sec + (double)t.tv_usec * 1E-6;
+}
 
-    if (index_right == index_left) {
-        return;
-    }
+void swap(int *array, int index_left, int index_right) {
+	int temp;
+	temp = array[index_left];
+    array[index_left] = array[index_right];
+    array[index_right] = temp;
+}
 
-    int temp;
-    int index_left_for_next = index_left;
-    int index_right_for_next = index_right;
+int sort_relative_to_pivot(int *array, int index_left, int index_right) {
+
     int index_pivot = (index_left + index_right) / 2;
-
     while (index_right > index_left) {
         if (array[index_left] >= array[index_pivot] &&
             array[index_right] <= array[index_pivot]) {
-            temp = array[index_left];
-            array[index_left] = array[index_right];
-            array[index_right] = temp;
+            swap(array, index_left, index_right);
             if (index_left == index_pivot) {
                 index_pivot = index_right;
                 index_left++;
@@ -38,12 +42,22 @@ void quicksort(int *array, int index_left, int index_right) {
             }
         }
     }
+    return index_pivot;
+}
 
-    if (index_left_for_next != index_pivot) {
-        quicksort(array, index_left_for_next, index_pivot - 1);
+void quicksort(int *array, int index_left, int index_right) {
+
+    if (index_right == index_left) {
+        return;
     }
-    if (index_right_for_next != index_pivot) {
-        quicksort(array, index_pivot + 1, index_right_for_next);
+
+    int index_pivot = sort_relative_to_pivot(array, index_left, index_right);
+
+    if (index_left != index_pivot) {
+        quicksort(array, index_left, index_pivot - 1);
+    }
+    if (index_right != index_pivot) {
+        quicksort(array, index_pivot + 1, index_right);
     }
 }
 
@@ -74,7 +88,10 @@ int main(int argc, char *argv[]) {
         size = i - 1;
 
         printf("Starting to sort!\n");
+        double t;
+        t = wtime();
         quicksort(array, 0, size - 1);
+        t = wtime() - t;
         printf("Quicksort completed!\n");
 
         fp = fopen(argv[2], "w");
@@ -91,7 +108,7 @@ int main(int argc, char *argv[]) {
         }
         fclose(fp);
         printf("Sorted content write to %s successfully!\n", argv[2]);
-
+        printf("Time of sorting = %lf\n", t);
         free(array);
     } else {
         printf("Use: ./serial [Name of source file] [Name of result file]\n");
