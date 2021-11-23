@@ -88,17 +88,19 @@ int main(int argc, char *argv[]) {
         int *array;
         int *local_array;
         int local_size;
+        double t_read, t, t_merge, t_quicksort, t_exchange;
         FILE *fp;
         if (rank == 0) {
             fp = fopen(argv[1], "r");
             if (!fp) {
                 printf("File open failed!\n");
-                printf("Press enter to continue.");
+                printf("Press enter to continue.\n");
                 getchar();
-                return 0;
+                exit(-1);
             } else {
-                printf("File for reading opened successfully!\n");
+                // printf("File for reading opened successfully!\n");
             }
+            t_read = MPI_Wtime();
             array = malloc(sizeof(int) * capacity);
 
             for (int i = 0; !feof(fp); i++) {
@@ -109,10 +111,14 @@ int main(int argc, char *argv[]) {
                 fscanf(fp, "%d", &array[i]);
                 size++;
             }
+            t_read = MPI_Wtime() - t_read;
             fclose(fp);
-            printf("File content read successfully!\n");
+            printf("t_read = %lf\n", t_read);
+            // printf("File content read successfully!\n");
         }
-
+        MPI_Barrier(MPI_COMM_WORLD);
+        t = MPI_Wtime();
+        t_exchange = MPI_Wtime();
         MPI_Bcast(&size, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
         local_size = (rank != commsize - 1)
@@ -128,21 +134,23 @@ int main(int argc, char *argv[]) {
                              : (size - ((size / commsize) * (commsize - 1)));
             displs[i] = (i > 0) ? displs[i - 1] + scounts[i - 1] : 0;
         }
+        
         MPI_Scatterv(array, scounts, displs, MPI_INT, local_array, local_size,
                      MPI_INT, 0, MPI_COMM_WORLD);
+        t_exchange = MPI_Wtime() - t_exchange;
 
         if (rank == 0) {
             free(array);
             array = NULL;
         }
-
-        if (rank == 0) {
-            printf("Starting to sort!\n");
-        }
-        double t;
-        t = MPI_Wtime();
+        
+        // if (rank == 0) {
+        //     printf("Starting to sort!\n");
+        // }
+        t_quicksort = MPI_Wtime();
         quicksort(local_array, 0, local_size - 1);
-
+        t_quicksort = MPI_Wtime() - t_quicksort;
+        t_merge = MPI_Wtime();
         int recv_size;
         int *recv_array;
         for (int step = 1; step < commsize; step = 2 * step) {
@@ -166,16 +174,24 @@ int main(int argc, char *argv[]) {
                 local_size = local_size + recv_size;
             }
         }
+        t_merge = MPI_Wtime() - t_merge;
         t = MPI_Wtime() - t;
 
-        if (rank == 0) {
-            printf("Quicksort completed!\n");
-        }
+        // if (rank == 0) {
+            // printf("Quicksort completed!\n");
+        // }
 
-        double tmax;
+        double tmax, t_merge_max, t_quicksort_max, t_exchange_max;
         MPI_Reduce(&t, &tmax, 1, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
+        MPI_Reduce(&t_merge, &t_merge_max, 1, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
+        MPI_Reduce(&t_quicksort, &t_quicksort_max, 1, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
+        MPI_Reduce(&t_exchange, &t_exchange_max, 1, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
 
         if (rank == 0) {
+            printf("\nt_exchange_max = %lf\n", t_exchange_max);
+            printf("\nt_quicksort_max = %lf\n", t_quicksort_max);
+            printf("\nt_merge_max = %lf\n", t_merge_max);
+            printf("\nt_quicksort_max + t_merge_max = %lf\n", t_quicksort_max + t_merge_max);
             printf("\ntmax = %lf\n", tmax);
             fp = fopen(argv[2], "w");
             if (!fp) {
@@ -184,7 +200,7 @@ int main(int argc, char *argv[]) {
                 getchar();
                 return 0;
             } else {
-                printf("File for writing opened successfully!\n");
+                // printf("File for writing opened successfully!\n");
             }
             for (int i = 0; i < local_size; i++) {
                 if (i < local_size - 1) {
@@ -194,7 +210,7 @@ int main(int argc, char *argv[]) {
                 }
             }
             fclose(fp);
-            printf("Sorted content write to %s successfully!\n", argv[2]);
+            // printf("Sorted content write to %s successfully!\n", argv[2]);
         }
 
         free(local_array);

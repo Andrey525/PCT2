@@ -69,11 +69,11 @@ int main(int argc, char *argv[]) {
             getchar();
             return 0;
         } else {
-            printf("File for reading opened successfully!\n");
+            // printf("File for reading opened successfully!\n");
         }
         double t_read;
         t_read = wtime();
-        int capacity = 10;
+        int capacity = 1000000;
         int size = 0;
         int *array = malloc(sizeof(int) * capacity);
         for (int i = 0; !feof(fp); i++) {
@@ -84,17 +84,17 @@ int main(int argc, char *argv[]) {
             fscanf(fp, "%d", &array[i]);
             size++;
         }
-        fclose(fp);
         t_read = wtime() - t_read;
+        fclose(fp);
         printf("t_read = %lf\n", t_read);
-        printf("File content read successfully!\n");
+        // printf("File content read successfully!\n");
 
-        printf("Starting to sort!\n");
+        // printf("Starting to sort!\n");
         double t;
         t = wtime();
         quicksort(array, 0, size - 1);
         t = wtime() - t;
-        printf("Quicksort completed!\n");
+        // printf("Quicksort completed!\n");
 
         fp = fopen(argv[2], "w");
         if (!fp) {
@@ -103,7 +103,7 @@ int main(int argc, char *argv[]) {
             getchar();
             return 0;
         } else {
-            printf("File for writing opened successfully!\n");
+            // printf("File for writing opened successfully!\n");
         }
         for (int i = 0; i < size; i++) {
             if (i < size - 1) {
@@ -113,7 +113,7 @@ int main(int argc, char *argv[]) {
             }
         }
         fclose(fp);
-        printf("Sorted content write to %s successfully!\n", argv[2]);
+        // printf("Sorted content write to %s successfully!\n", argv[2]);
         printf("Time of sorting = %lf\n", t);
         free(array);
     } else {
