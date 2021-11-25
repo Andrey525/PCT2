@@ -10,7 +10,6 @@ void swap(int *array, int index_left, int index_right) {
 }
 
 int sort_relative_to_pivot(int *array, int index_left, int index_right) {
-
     int index_pivot = (index_left + index_right) / 2;
     while (index_right > index_left) {
         if (array[index_left] >= array[index_pivot] &&
@@ -43,7 +42,6 @@ void quicksort(int *array, int index_left, int index_right) {
     if (index_right == index_left) {
         return;
     }
-
     int index_pivot = sort_relative_to_pivot(array, index_left, index_right);
 
     if (index_left != index_pivot) {
@@ -97,8 +95,6 @@ int main(int argc, char *argv[]) {
                 printf("Press enter to continue.\n");
                 getchar();
                 exit(-1);
-            } else {
-                // printf("File for reading opened successfully!\n");
             }
             t_read = MPI_Wtime();
             array = malloc(sizeof(int) * capacity);
@@ -114,18 +110,15 @@ int main(int argc, char *argv[]) {
             t_read = MPI_Wtime() - t_read;
             fclose(fp);
             printf("t_read = %lf\n", t_read);
-            // printf("File content read successfully!\n");
         }
         MPI_Barrier(MPI_COMM_WORLD);
         t = MPI_Wtime();
         t_exchange = MPI_Wtime();
         MPI_Bcast(&size, 1, MPI_INT, 0, MPI_COMM_WORLD);
-
         local_size = (rank != commsize - 1)
                          ? (size / commsize)
                          : (size - ((size / commsize) * (commsize - 1)));
         local_array = calloc(local_size, sizeof(int));
-
         int *displs = malloc(sizeof(int) * commsize);
         int *scounts = malloc(sizeof(int) * commsize);
         for (int i = 0; i < commsize; i++) {
@@ -134,19 +127,13 @@ int main(int argc, char *argv[]) {
                              : (size - ((size / commsize) * (commsize - 1)));
             displs[i] = (i > 0) ? displs[i - 1] + scounts[i - 1] : 0;
         }
-        
         MPI_Scatterv(array, scounts, displs, MPI_INT, local_array, local_size,
                      MPI_INT, 0, MPI_COMM_WORLD);
         t_exchange = MPI_Wtime() - t_exchange;
-
         if (rank == 0) {
             free(array);
             array = NULL;
         }
-        
-        // if (rank == 0) {
-        //     printf("Starting to sort!\n");
-        // }
         t_quicksort = MPI_Wtime();
         quicksort(local_array, 0, local_size - 1);
         t_quicksort = MPI_Wtime() - t_quicksort;
@@ -176,17 +163,11 @@ int main(int argc, char *argv[]) {
         }
         t_merge = MPI_Wtime() - t_merge;
         t = MPI_Wtime() - t;
-
-        // if (rank == 0) {
-            // printf("Quicksort completed!\n");
-        // }
-
         double tmax, t_merge_max, t_quicksort_max, t_exchange_max;
         MPI_Reduce(&t, &tmax, 1, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
         MPI_Reduce(&t_merge, &t_merge_max, 1, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
         MPI_Reduce(&t_quicksort, &t_quicksort_max, 1, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
         MPI_Reduce(&t_exchange, &t_exchange_max, 1, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
-
         if (rank == 0) {
             printf("\nt_exchange_max = %lf\n", t_exchange_max);
             printf("\nt_quicksort_max = %lf\n", t_quicksort_max);
@@ -199,8 +180,6 @@ int main(int argc, char *argv[]) {
                 printf("Press enter to continue.");
                 getchar();
                 return 0;
-            } else {
-                // printf("File for writing opened successfully!\n");
             }
             for (int i = 0; i < local_size; i++) {
                 if (i < local_size - 1) {
@@ -210,11 +189,8 @@ int main(int argc, char *argv[]) {
                 }
             }
             fclose(fp);
-            // printf("Sorted content write to %s successfully!\n", argv[2]);
         }
-
         free(local_array);
-
     } else {
         if (rank == 0) {
             printf("Use: mpiexec ./parallel [Name of source file] [Name of "

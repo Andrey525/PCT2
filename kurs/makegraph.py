@@ -5,15 +5,14 @@ import numpy as np
 import matplotlib.ticker as ticker
 
 def main():
-    datafiles = ["linear.dat", "parallel.dat"]
-    labels = ["linear speedup", "speedup at n = 1 billion"]
+    datafiles = ["linear.dat", "parallel_100.dat", "parallel_50.dat"]
+    labels = ["linear speedup", "n = 100 000 000", "n = 50 000 000"]
     cm = 1/2.54  # centimeters in inche
     fig = plt.figure(figsize=(16*cm, 10*cm))
     ax = fig.add_subplot(111)
-    colors=["black", "blue"]
+    colors=["black", "blue", "darkgreen", "red"]
     ax.set(xlabel="Processes", ylabel="Speedup", title="Quicksort parallel")
-    # ax.xaxis.set_major_locator(ticker.MultipleLocator(8))
-    plt.xticks([4, 8, 16, 32])
+    plt.xticks([2, 4, 8])
 
     # Draw data files
     for i in range(len(datafiles)):

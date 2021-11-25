@@ -68,8 +68,6 @@ int main(int argc, char *argv[]) {
             printf("Press enter to continue.");
             getchar();
             return 0;
-        } else {
-            // printf("File for reading opened successfully!\n");
         }
         double t_read;
         t_read = wtime();
@@ -87,23 +85,16 @@ int main(int argc, char *argv[]) {
         t_read = wtime() - t_read;
         fclose(fp);
         printf("t_read = %lf\n", t_read);
-        // printf("File content read successfully!\n");
-
-        // printf("Starting to sort!\n");
         double t;
         t = wtime();
         quicksort(array, 0, size - 1);
         t = wtime() - t;
-        // printf("Quicksort completed!\n");
-
         fp = fopen(argv[2], "w");
         if (!fp) {
             printf("File open failed!\n");
             printf("Press enter to continue.");
             getchar();
             return 0;
-        } else {
-            // printf("File for writing opened successfully!\n");
         }
         for (int i = 0; i < size; i++) {
             if (i < size - 1) {
@@ -113,7 +104,6 @@ int main(int argc, char *argv[]) {
             }
         }
         fclose(fp);
-        // printf("Sorted content write to %s successfully!\n", argv[2]);
         printf("Time of sorting = %lf\n", t);
         free(array);
     } else {
